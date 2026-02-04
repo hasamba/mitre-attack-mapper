@@ -6,8 +6,30 @@
     <title>MITRE ATT&CK Technique Mapper</title>
     <meta name="description" content="Map textual attack descriptions to MITRE ATT&CK techniques instantly">
     <meta name="keywords" content="MITRE ATT&CK, cybersecurity, threat intelligence, DFIR, SOC">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #111111;
+            --accent-bg: #1a1a1a;
+            --terminal-green: #00ff41;
+            --terminal-cyan: #00ffff;
+            --terminal-orange: #ff6b00;
+            --terminal-red: #ff0040;
+            --terminal-yellow: #ffff00;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --text-dim: #606060;
+            --border-primary: #333333;
+            --border-accent: #00ff41;
+            --glow-green: rgba(0, 255, 65, 0.3);
+            --glow-cyan: rgba(0, 255, 255, 0.3);
+            --glow-orange: rgba(255, 107, 0, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,64 +37,256 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0c1426 0%, #1a1f3a 100%);
-            color: #e2e8f0;
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            background: var(--primary-bg);
+            color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Terminal scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 65, 0.02) 2px,
+                rgba(0, 255, 65, 0.02) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlines 0.1s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        /* Matrix-style background */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, rgba(0, 255, 65, 0.1), transparent),
+                radial-gradient(1px 1px at 40px 70px, rgba(0, 255, 255, 0.05), transparent),
+                radial-gradient(2px 2px at 90px 40px, rgba(255, 107, 0, 0.05), transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: matrix-drift 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes matrix-drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-200px, -200px); }
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: var(--terminal-green);
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+            margin-left: 1px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
             min-height: 100vh;
             display: grid;
             grid-template-rows: auto 1fr auto;
             gap: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 2px solid #2d3748;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--border-primary);
+            background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--accent-bg) 100%);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            animation: sweep 3s infinite;
+        }
+
+        @keyframes sweep {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #63b3ed;
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--terminal-green);
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(99, 179, 237, 0.3);
+            text-shadow: 
+                0 0 10px var(--glow-green),
+                0 0 20px var(--glow-green),
+                0 0 40px var(--glow-green);
+            letter-spacing: 2px;
+            animation: title-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes title-glow {
+            0% { text-shadow: 0 0 10px var(--glow-green), 0 0 20px var(--glow-green), 0 0 40px var(--glow-green); }
+            100% { text-shadow: 0 0 15px var(--glow-green), 0 0 30px var(--glow-green), 0 0 60px var(--glow-green); }
         }
 
         .header p {
-            font-size: 1.2rem;
-            color: #a0aec0;
+            font-size: 1.1rem;
+            color: var(--terminal-cyan);
             max-width: 600px;
             margin: 0 auto;
+            text-shadow: 0 0 5px var(--glow-cyan);
+            animation: type-in 2s ease-out;
+        }
+
+        @keyframes type-in {
+            0% { width: 0; overflow: hidden; }
+            100% { width: 100%; }
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--secondary-bg);
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: 1px solid var(--border-primary);
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--terminal-green);
+            box-shadow: 0 0 10px var(--glow-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 450px;
             gap: 30px;
             align-items: start;
         }
 
-        .input-section {
-            background: rgba(45, 55, 72, 0.8);
-            border-radius: 12px;
-            padding: 30px;
-            border: 1px solid #4a5568;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        .terminal-window {
+            background: var(--secondary-bg);
+            border-radius: 8px;
+            border: 2px solid var(--border-primary);
+            box-shadow: 
+                0 0 30px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            position: relative;
         }
 
-        .input-section h2 {
-            color: #63b3ed;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-            font-weight: 600;
+        .terminal-header {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .terminal-control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .control-close { background: var(--terminal-red); }
+        .control-minimize { background: var(--terminal-yellow); }
+        .control-maximize { background: var(--terminal-green); }
+
+        .terminal-title {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .input-section {
+            padding: 25px;
+        }
+
+        .section-title {
+            color: var(--terminal-cyan);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-shadow: 0 0 5px var(--glow-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '>';
+            color: var(--terminal-green);
+            font-weight: bold;
         }
 
         .textarea-container {
@@ -83,63 +297,87 @@
         #attackDescription {
             width: 100%;
             min-height: 200px;
-            background: #1a202c;
-            border: 2px solid #4a5568;
-            border-radius: 8px;
+            background: var(--primary-bg);
+            border: 2px solid var(--border-primary);
+            border-radius: 6px;
             padding: 15px;
-            color: #e2e8f0;
-            font-size: 16px;
-            line-height: 1.5;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
             resize: vertical;
-            font-family: 'Consolas', 'Monaco', monospace;
+            font-family: 'JetBrains Mono', monospace;
             transition: all 0.3s ease;
         }
 
         #attackDescription:focus {
             outline: none;
-            border-color: #63b3ed;
-            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+            border-color: var(--terminal-green);
+            box-shadow: 
+                0 0 0 2px var(--glow-green),
+                inset 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         #attackDescription::placeholder {
-            color: #718096;
+            color: var(--text-dim);
         }
 
         .char-counter {
             position: absolute;
-            bottom: -25px;
+            bottom: -20px;
             right: 0;
-            font-size: 12px;
-            color: #718096;
+            font-size: 11px;
+            color: var(--text-dim);
         }
 
         .controls {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
             flex-wrap: wrap;
         }
 
         .btn {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--terminal-green), #00cc33);
+            color: var(--primary-bg);
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 10px 18px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
-            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            box-shadow: 
+                0 0 15px var(--glow-green),
+                0 2px 8px rgba(0, 0, 0, 0.4);
             transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(65, 153, 225, 0.3);
         }
 
         .btn:active {
@@ -147,182 +385,44 @@
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            background: linear-gradient(135deg, var(--terminal-cyan), #0099cc);
         }
 
         .btn-secondary:hover {
-            background: linear-gradient(135deg, #2f855a 0%, #276749 100%);
-            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+            box-shadow: 
+                0 0 15px var(--glow-cyan),
+                0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            background: linear-gradient(135deg, var(--terminal-orange), #cc5500);
         }
 
         .btn-danger:hover {
-            background: linear-gradient(135deg, #c53030 0%, #9c2727 100%);
-            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.3);
+            box-shadow: 
+                0 0 15px var(--glow-orange),
+                0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .results-section {
-            background: rgba(45, 55, 72, 0.8);
-            border-radius: 12px;
-            padding: 30px;
-            border: 1px solid #4a5568;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            max-height: 80vh;
-            overflow-y: auto;
+            padding: 25px;
         }
 
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #4a5568;
-        }
-
-        .results-title {
-            color: #63b3ed;
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
-
-        .results-count {
-            background: #4a5568;
-            color: #e2e8f0;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .technique-card {
-            background: #1a202c;
-            border: 1px solid #4a5568;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .technique-card:hover {
-            border-color: #63b3ed;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .technique-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .technique-id {
-            background: #4a5568;
-            color: #e2e8f0;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .confidence-score {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: auto;
-        }
-
-        .confidence-high {
-            background: #38a169;
-            color: white;
-        }
-
-        .confidence-medium {
-            background: #d69e2e;
-            color: white;
-        }
-
-        .confidence-low {
-            background: #e53e3e;
-            color: white;
-        }
-
-        .technique-name {
-            color: #63b3ed;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-
-        .technique-tactic {
-            color: #a0aec0;
-            font-size: 14px;
-            margin-bottom: 10px;
-            font-style: italic;
-        }
-
-        .technique-description {
-            color: #cbd5e0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .no-results {
+        .loading {
             text-align: center;
             padding: 40px 20px;
-            color: #718096;
+            color: var(--terminal-cyan);
         }
 
-        .no-results .icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .export-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #4a5568;
-        }
-
-        .export-controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px 0;
-            border-top: 1px solid #2d3748;
-            color: #718096;
-            font-size: 14px;
-        }
-
-        .footer a {
-            color: #63b3ed;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Loading spinner */
-        .spinner {
-            border: 3px solid #4a5568;
-            border-top: 3px solid #63b3ed;
-            border-radius: 50%;
+        .loading-spinner {
+            display: inline-block;
             width: 30px;
             height: 30px;
+            border: 3px solid var(--border-primary);
+            border-top: 3px solid var(--terminal-cyan);
+            border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin-bottom: 15px;
         }
 
         @keyframes spin {
@@ -330,655 +430,794 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive design */
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
+        .loading-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .results {
+            display: grid;
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .results::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .results::-webkit-scrollbar-track {
+            background: var(--primary-bg);
+            border-radius: 4px;
+        }
+
+        .results::-webkit-scrollbar-thumb {
+            background: var(--terminal-green);
+            border-radius: 4px;
+            box-shadow: 0 0 5px var(--glow-green);
+        }
+
+        .technique-card {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .technique-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--terminal-green);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+            transform-origin: bottom;
+        }
+
+        .technique-card:hover {
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 20px var(--glow-green);
+            transform: translateX(5px);
+        }
+
+        .technique-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .technique-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .technique-id {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            color: var(--terminal-orange);
+            font-size: 13px;
+            text-shadow: 0 0 3px var(--glow-orange);
+        }
+
+        .confidence-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--terminal-green);
+            color: var(--primary-bg);
+            box-shadow: 0 0 8px var(--glow-green);
+        }
+
+        .confidence-medium {
+            background: var(--terminal-cyan);
+            box-shadow: 0 0 8px var(--glow-cyan);
+        }
+
+        .confidence-low {
+            background: var(--terminal-orange);
+            box-shadow: 0 0 8px var(--glow-orange);
+        }
+
+        .technique-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .technique-description {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .matched-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .keyword {
+            background: rgba(0, 255, 65, 0.2);
+            color: var(--terminal-green);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 500;
+            border: 1px solid var(--terminal-green);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-primary);
+        }
+
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--accent-bg);
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid var(--border-primary);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--terminal-green);
+            text-shadow: 0 0 5px var(--glow-green);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-primary);
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: var(--terminal-cyan);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--terminal-green);
+            text-shadow: 0 0 3px var(--glow-green);
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .main-content {
+                grid-template-columns: 1fr;
             }
             
             .header h1 {
                 font-size: 2rem;
             }
             
-            .header p {
-                font-size: 1rem;
-            }
-            
-            .input-section, .results-section {
-                padding: 20px;
-            }
-            
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .btn {
-                justify-content: center;
+            .container {
+                padding: 15px;
             }
         }
 
-        /* Syntax highlighting for matched keywords */
-        .highlighted {
-            background: rgba(99, 179, 237, 0.2);
-            border-radius: 3px;
-            padding: 1px 3px;
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--terminal-green);
+            white-space: nowrap;
+            animation: 
+                typing 3s steps(40, end),
+                blink-caret 0.75s step-end infinite;
         }
 
-        /* Animation for results appearing */
-        .technique-card {
-            opacity: 0;
-            animation: fadeInUp 0.5s ease forwards;
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--terminal-green) }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1>MITRE ATT&CK Technique Mapper</h1>
-            <p>Map textual attack descriptions to MITRE ATT&CK techniques instantly</p>
-        </header>
+        <div class="header">
+            <h1>MITRE ATT&CK</h1>
+            <h1 style="margin-top: -10px;">TECHNIQUE MAPPER</h1>
+            <p>Advanced threat intelligence analysis terminal<span class="terminal-cursor"></span></p>
+        </div>
 
-        <main class="main-content">
-            <section class="input-section">
-                <h2>📝 Attack Description</h2>
-                <div class="textarea-container">
-                    <textarea 
-                        id="attackDescription" 
-                        placeholder="Paste your attack description here...
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-indicator"></span>
+                <span>SYSTEM ONLINE</span>
+            </div>
+            <div class="status-item">
+                <span>TECHNIQUES: 30+</span>
+            </div>
+            <div class="status-item">
+                <span>MODE: REAL-TIME</span>
+            </div>
+            <div class="status-item">
+                <span id="current-time"></span>
+            </div>
+        </div>
 
-Example: &quot;The attacker used PowerShell to download a malicious payload from a C2 server, then established persistence through a scheduled task and harvested credentials using Mimikatz.&quot;"
-                        maxlength="10000"
-                    ></textarea>
-                    <div class="char-counter">
-                        <span id="charCount">0</span> / 10,000
+        <div class="main-content">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-controls">
+                        <div class="terminal-control control-close"></div>
+                        <div class="terminal-control control-minimize"></div>
+                        <div class="terminal-control control-maximize"></div>
                     </div>
+                    <div class="terminal-title">attack_analyzer.exe</div>
                 </div>
-                
-                <div class="controls">
-                    <button class="btn" id="analyzeBtn">
-                        🔍 Analyze Attack
-                    </button>
-                    <button class="btn btn-secondary" id="exampleBtn">
-                        📋 Load Example
-                    </button>
-                    <button class="btn btn-danger" id="clearBtn">
-                        🗑️ Clear
-                    </button>
-                </div>
-            </section>
-
-            <section class="results-section">
-                <div class="results-header">
-                    <h2 class="results-title">🎯 Mapped Techniques</h2>
-                    <span class="results-count" id="resultsCount">0 results</span>
-                </div>
-                
-                <div id="resultsContainer">
-                    <div class="no-results">
-                        <div class="icon">🔍</div>
-                        <p>Enter an attack description to see mapped MITRE ATT&CK techniques</p>
+                <div class="input-section">
+                    <h2 class="section-title">INPUT STREAM</h2>
+                    <div class="textarea-container">
+                        <textarea 
+                            id="attackDescription" 
+                            placeholder="Enter attack description, IOCs, or threat intelligence data...
+                            
+Example: 'Adversary used PowerShell to download and execute malicious payload from external server, established persistence through registry modification, and performed lateral movement using WMI.'"
+                            maxlength="5000"></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span>/5000
+                        </div>
                     </div>
-                </div>
-
-                <div class="export-section">
-                    <h3 style="color: #63b3ed; margin-bottom: 15px; font-size: 1.1rem;">📤 Export Results</h3>
-                    <div class="export-controls">
-                        <button class="btn btn-secondary" id="copyJsonBtn" disabled>
-                            📋 Copy JSON
+                    
+                    <div class="controls">
+                        <button class="btn" onclick="analyzeAttack()" id="analyzeBtn">
+                            <span>🔍</span> ANALYZE
                         </button>
-                        <button class="btn btn-secondary" id="downloadJsonBtn" disabled>
-                            💾 Download JSON
+                        <button class="btn btn-secondary" onclick="loadExample()">
+                            <span>📋</span> LOAD EXAMPLE
                         </button>
-                        <button class="btn btn-secondary" id="printBtn" disabled>
-                            🖨️ Print Report
+                        <button class="btn btn-danger" onclick="clearInput()">
+                            <span>🗑️</span> CLEAR
                         </button>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
 
-        <footer class="footer">
-            <p>
-                Built with ❤️ for the cybersecurity community | 
-                Data based on <a href="https://attack.mitre.org/" target="_blank">MITRE ATT&CK Framework</a> |
-                <a href="https://github.com/hasamba" target="_blank">GitHub</a>
-            </p>
-        </footer>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-controls">
+                        <div class="terminal-control control-close"></div>
+                        <div class="terminal-control control-minimize"></div>
+                        <div class="terminal-control control-maximize"></div>
+                    </div>
+                    <div class="terminal-title">mitre_results.log</div>
+                </div>
+                <div class="results-section">
+                    <h2 class="section-title">ANALYSIS RESULTS</h2>
+                    
+                    <div class="stats-display">
+                        <div class="stat-card">
+                            <span class="stat-value" id="matchCount">0</span>
+                            <span class="stat-label">MATCHES</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="highConfidence">0</span>
+                            <span class="stat-label">HIGH CONF</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="medConfidence">0</span>
+                            <span class="stat-label">MED CONF</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="lowConfidence">0</span>
+                            <span class="stat-label">LOW CONF</span>
+                        </div>
+                    </div>
+
+                    <div id="results">
+                        <div class="no-results">
+                            <p>> AWAITING INPUT...</p>
+                            <p style="font-size: 11px; margin-top: 10px;">Enter attack description above to begin analysis</p>
+                        </div>
+                    </div>
+
+                    <div class="export-section" id="exportSection" style="display: none;">
+                        <div class="controls">
+                            <button class="btn btn-secondary" onclick="exportResults()">
+                                <span>📥</span> EXPORT JSON
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyToClipboard()">
+                                <span>📋</span> COPY RESULTS
+                            </button>
+                            <button class="btn btn-secondary" onclick="printResults()">
+                                <span>🖨️</span> PRINT REPORT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 MITRE ATT&CK Technique Mapper | 
+            <a href="https://github.com/hasamba/mitre-attack-mapper" target="_blank">Source Code</a> | 
+            <a href="https://attack.mitre.org" target="_blank">MITRE ATT&CK Framework</a></p>
+        </div>
     </div>
 
     <script>
-        // MITRE ATT&CK techniques database with keyword mappings
-        const attackTechniques = [
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = 
+                now.toTimeString().substr(0, 8) + ' UTC';
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Character counter
+        document.getElementById('attackDescription').addEventListener('input', function() {
+            const charCount = this.value.length;
+            document.getElementById('charCount').textContent = charCount;
+        });
+
+        // MITRE ATT&CK techniques database with keywords
+        const mitreDatabase = [
             {
                 id: "T1059.001",
                 name: "PowerShell",
-                tactic: "Execution",
                 description: "Adversaries may abuse PowerShell commands and scripts for execution.",
-                keywords: ["powershell", "ps1", "invoke-expression", "iex", "encoded command", "base64", "powershell.exe"]
-            },
-            {
-                id: "T1105",
-                name: "Ingress Tool Transfer",
-                tactic: "Command and Control",
-                description: "Adversaries may transfer tools or other files from an external system into a compromised environment.",
-                keywords: ["download", "wget", "curl", "certutil", "bitsadmin", "transfer", "c2", "payload", "dropper"]
-            },
-            {
-                id: "T1053",
-                name: "Scheduled Task/Job",
-                tactic: "Persistence",
-                description: "Adversaries may abuse task scheduling functionality to facilitate initial or recurring execution of malicious code.",
-                keywords: ["scheduled task", "schtasks", "cron", "at command", "job", "task scheduler", "persistence"]
-            },
-            {
-                id: "T1003.001",
-                name: "LSASS Memory",
-                tactic: "Credential Access",
-                description: "Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS).",
-                keywords: ["mimikatz", "lsass", "credentials", "sekurlsa", "lsadump", "memory dump", "credential harvesting"]
+                keywords: ["powershell", "ps1", "invoke", "iex", "downloadstring", "powershell.exe", "encoded command"]
             },
             {
                 id: "T1055",
                 name: "Process Injection",
-                tactic: "Defense Evasion",
-                description: "Adversaries may inject code into processes in order to evade process-based defenses.",
-                keywords: ["process injection", "dll injection", "code injection", "reflective dll", "process hollowing"]
+                description: "Adversaries may inject code into processes in order to evade detection.",
+                keywords: ["process injection", "dll injection", "code injection", "createremotethread", "setwindowshookex"]
             },
             {
-                id: "T1071.001",
-                name: "Web Protocols",
-                tactic: "Command and Control",
-                description: "Adversaries may communicate using application layer protocols associated with web traffic.",
-                keywords: ["http", "https", "web traffic", "user-agent", "web protocol", "http beacon"]
+                id: "T1003",
+                name: "OS Credential Dumping",
+                description: "Adversaries may attempt to dump credentials to obtain account login information.",
+                keywords: ["mimikatz", "lsass", "credential dumping", "password dump", "sam database", "ntds.dit"]
             },
             {
-                id: "T1027",
-                name: "Obfuscated Files or Information",
-                tactic: "Defense Evasion",
-                description: "Adversaries may attempt to make an executable or file difficult to discover or analyze.",
-                keywords: ["obfuscation", "encoded", "encrypted", "base64", "packed", "compressed", "steganography"]
-            },
-            {
-                id: "T1082",
-                name: "System Information Discovery",
-                tactic: "Discovery",
-                description: "An adversary may attempt to get detailed information about the operating system and hardware.",
-                keywords: ["systeminfo", "hostname", "whoami", "system information", "reconnaissance", "discovery"]
-            },
-            {
-                id: "T1083",
-                name: "File and Directory Discovery",
-                tactic: "Discovery",
-                description: "Adversaries may enumerate files and directories or may search in specific locations of a host or network share.",
-                keywords: ["dir", "ls", "find", "file discovery", "directory listing", "enumeration"]
-            },
-            {
-                id: "T1057",
-                name: "Process Discovery",
-                tactic: "Discovery",
-                description: "Adversaries may attempt to get information about running processes on a system.",
-                keywords: ["tasklist", "ps", "process discovery", "running processes", "process enumeration"]
-            },
-            {
-                id: "T1016",
-                name: "System Network Configuration Discovery",
-                tactic: "Discovery",
-                description: "Adversaries may look for details about the network configuration and settings of systems.",
-                keywords: ["ipconfig", "ifconfig", "netstat", "network configuration", "network discovery"]
-            },
-            {
-                id: "T1033",
-                name: "System Owner/User Discovery",
-                tactic: "Discovery",
-                description: "Adversaries may attempt to identify the primary user, currently logged in user, set of users that commonly uses a system.",
-                keywords: ["whoami", "query user", "user discovery", "logged in users", "user enumeration"]
-            },
-            {
-                id: "T1049",
-                name: "System Network Connections Discovery",
-                tactic: "Discovery",
-                description: "Adversaries may attempt to get a listing of network connections to or from the compromised system.",
-                keywords: ["netstat", "network connections", "active connections", "listening ports"]
-            },
-            {
-                id: "T1018",
-                name: "Remote System Discovery",
-                tactic: "Discovery",
-                description: "Adversaries may attempt to get a listing of other systems by IP address, hostname, or other logical identifier.",
-                keywords: ["ping", "net view", "remote systems", "network scanning", "arp"]
-            },
-            {
-                id: "T1021.001",
-                name: "Remote Desktop Protocol",
-                tactic: "Lateral Movement",
-                description: "Adversaries may use Valid Accounts to log into a computer using the Remote Desktop Protocol (RDP).",
-                keywords: ["rdp", "remote desktop", "mstsc", "terminal services", "3389"]
-            },
-            {
-                id: "T1021.002",
-                name: "SMB/Windows Admin Shares",
-                tactic: "Lateral Movement",
-                description: "Adversaries may use Valid Accounts to interact with a remote network share using Server Message Block (SMB).",
-                keywords: ["smb", "admin shares", "c$", "psexec", "wmiexec", "445"]
-            },
-            {
-                id: "T1078",
-                name: "Valid Accounts",
-                tactic: "Defense Evasion",
-                description: "Adversaries may obtain and abuse credentials of existing accounts as a means of gaining Initial Access.",
-                keywords: ["valid accounts", "compromised credentials", "stolen credentials", "account abuse"]
+                id: "T1105",
+                name: "Ingress Tool Transfer",
+                description: "Adversaries may transfer tools or other files from an external system.",
+                keywords: ["download", "wget", "curl", "certutil", "bitsadmin", "file transfer", "payload download"]
             },
             {
                 id: "T1547.001",
                 name: "Registry Run Keys / Startup Folder",
-                tactic: "Persistence",
-                description: "Adversaries may achieve persistence by adding a program to a startup folder or referencing it with a Registry run key.",
-                keywords: ["registry", "run keys", "startup folder", "autostart", "hkcu", "hklm"]
+                description: "Adversaries may achieve persistence by adding programs to startup folders or registry run keys.",
+                keywords: ["registry", "run key", "startup", "persistence", "autorun", "hkey_current_user\\software\\microsoft\\windows\\currentversion\\run"]
+            },
+            {
+                id: "T1021.002",
+                name: "SMB/Windows Admin Shares",
+                description: "Adversaries may use SMB to interact with file shares for lateral movement.",
+                keywords: ["smb", "admin shares", "psexec", "lateral movement", "net use", "c$", "admin$"]
+            },
+            {
+                id: "T1047",
+                name: "Windows Management Instrumentation",
+                description: "Adversaries may abuse WMI to execute malicious commands and payloads.",
+                keywords: ["wmi", "wmic", "windows management instrumentation", "wmi query", "cim"]
             },
             {
                 id: "T1543.003",
                 name: "Windows Service",
-                tactic: "Persistence",
-                description: "Adversaries may create or modify Windows services to repeatedly execute malicious payloads.",
-                keywords: ["windows service", "sc", "service", "services.exe", "service creation"]
+                description: "Adversaries may create or modify Windows services to achieve persistence.",
+                keywords: ["service", "sc.exe", "services.exe", "windows service", "service creation"]
             },
             {
-                id: "T1112",
-                name: "Modify Registry",
-                tactic: "Defense Evasion",
-                description: "Adversaries may interact with the Windows Registry to hide configuration information.",
-                keywords: ["registry", "reg", "regedit", "registry modification", "hkey"]
+                id: "T1087.002",
+                name: "Domain Account Discovery",
+                description: "Adversaries may attempt to get a listing of domain accounts.",
+                keywords: ["domain users", "net user", "ldap", "active directory", "domain enumeration"]
             },
             {
-                id: "T1090",
-                name: "Proxy",
-                tactic: "Command and Control",
-                description: "Adversaries may use a connection proxy to direct network traffic between systems.",
-                keywords: ["proxy", "socks", "tunneling", "connection proxy", "traffic redirection"]
-            },
-            {
-                id: "T1056.001",
-                name: "Keylogging",
-                tactic: "Collection",
-                description: "Adversaries may log user keystrokes to intercept credentials as the user types them.",
-                keywords: ["keylogger", "keylogging", "keystroke", "keyboard capture", "credential capture"]
-            },
-            {
-                id: "T1041",
-                name: "Exfiltration Over C2 Channel",
-                tactic: "Exfiltration",
-                description: "Adversaries may steal data by exfiltrating it over an existing command and control channel.",
-                keywords: ["exfiltration", "data theft", "c2 channel", "data exfil", "stolen data"]
-            },
-            {
-                id: "T1486",
-                name: "Data Encrypted for Impact",
-                tactic: "Impact",
-                description: "Adversaries may encrypt data on target systems or on large numbers of systems in a network to interrupt availability.",
-                keywords: ["ransomware", "encryption", "encrypted files", "data encryption", "crypto"]
+                id: "T1083",
+                name: "File and Directory Discovery",
+                description: "Adversaries may enumerate files and directories to find specific information.",
+                keywords: ["file discovery", "directory enumeration", "dir", "ls", "find", "file listing"]
             },
             {
                 id: "T1070.004",
                 name: "File Deletion",
-                tactic: "Defense Evasion",
-                description: "Adversaries may delete files left behind by the actions of their intrusion activity.",
-                keywords: ["file deletion", "del", "rm", "sdelete", "log deletion", "artifact removal"]
+                description: "Adversaries may delete files to hide indicators of compromise.",
+                keywords: ["file deletion", "del", "rm", "delete", "sdelete", "evidence removal"]
             },
             {
                 id: "T1036",
                 name: "Masquerading",
-                tactic: "Defense Evasion",
-                description: "Adversaries may attempt to manipulate features of their artifacts to make them appear legitimate.",
-                keywords: ["masquerading", "fake", "legitimate", "disguise", "impersonation", "spoofing"]
+                description: "Adversaries may attempt to manipulate features to make executable content appear legitimate.",
+                keywords: ["masquerading", "fake extension", "legitimate process", "process hollowing", "name spoofing"]
+            },
+            {
+                id: "T1218.011",
+                name: "Rundll32",
+                description: "Adversaries may abuse rundll32.exe to proxy execution of malicious code.",
+                keywords: ["rundll32", "rundll32.exe", "dll execution", "proxy execution"]
+            },
+            {
+                id: "T1027",
+                name: "Obfuscated Files or Information",
+                description: "Adversaries may attempt to make payloads difficult to analyze.",
+                keywords: ["obfuscation", "encoded", "encrypted", "packed", "steganography", "base64"]
+            },
+            {
+                id: "T1082",
+                name: "System Information Discovery",
+                description: "Adversaries may attempt to get detailed information about the operating system.",
+                keywords: ["system info", "systeminfo", "environment variables", "system discovery", "hostname"]
+            },
+            {
+                id: "T1090",
+                name: "Proxy",
+                description: "Adversaries may use a connection proxy to direct network traffic.",
+                keywords: ["proxy", "socks", "traffic redirection", "network proxy", "tunneling"]
+            },
+            {
+                id: "T1012",
+                name: "Query Registry",
+                description: "Adversaries may interact with the Windows Registry to gather information.",
+                keywords: ["registry query", "reg query", "regedit", "registry enumeration"]
+            },
+            {
+                id: "T1018",
+                name: "Remote System Discovery",
+                description: "Adversaries may attempt to get a listing of other systems by IP address, hostname, or other logical identifier.",
+                keywords: ["network discovery", "ping", "arp", "net view", "remote systems"]
+            },
+            {
+                id: "T1049",
+                name: "System Network Connections Discovery",
+                description: "Adversaries may attempt to get listing of network connections to or from the compromised system.",
+                keywords: ["netstat", "network connections", "established connections", "listening ports"]
+            },
+            {
+                id: "T1057",
+                name: "Process Discovery",
+                description: "Adversaries may attempt to get information about running processes on a system.",
+                keywords: ["process list", "tasklist", "ps", "running processes", "process enumeration"]
+            },
+            {
+                id: "T1124",
+                name: "System Time Discovery",
+                description: "Adversaries may gather system time and/or time zone from a local or remote system.",
+                keywords: ["time", "timezone", "date", "system time", "clock"]
+            },
+            {
+                id: "T1033",
+                name: "System Owner/User Discovery",
+                description: "Adversaries may attempt to identify the primary user, currently logged in user, or set of users.",
+                keywords: ["whoami", "current user", "username", "user discovery", "logged in users"]
+            },
+            {
+                id: "T1016",
+                name: "System Network Configuration Discovery",
+                description: "Adversaries may look for details about the network configuration of systems.",
+                keywords: ["ipconfig", "ifconfig", "network configuration", "dns", "routing table"]
             },
             {
                 id: "T1204.002",
                 name: "Malicious File",
-                tactic: "Execution",
-                description: "An adversary may rely upon a user opening a malicious file in order to gain execution.",
+                description: "Adversaries may rely upon a user opening a malicious file in order to gain execution.",
                 keywords: ["malicious file", "user execution", "email attachment", "document", "macro"]
             },
             {
                 id: "T1566.001",
                 name: "Spearphishing Attachment",
-                tactic: "Initial Access",
-                description: "Adversaries may send spearphishing emails with a malicious attachment.",
-                keywords: ["phishing", "spearphishing", "email attachment", "malicious attachment", "phishing email"]
+                description: "Adversaries may send spearphishing emails with malicious attachments.",
+                keywords: ["spearphishing", "email attachment", "phishing", "malicious email", "social engineering"]
             },
             {
-                id: "T1190",
-                name: "Exploit Public-Facing Application",
-                tactic: "Initial Access",
-                description: "Adversaries may attempt to take advantage of a weakness in an Internet-facing computer or program.",
-                keywords: ["exploit", "vulnerability", "public-facing", "web application", "remote exploit"]
+                id: "T1071.001",
+                name: "Web Protocols",
+                description: "Adversaries may communicate using application layer protocols associated with web traffic.",
+                keywords: ["http", "https", "web traffic", "application layer", "web protocols"]
+            },
+            {
+                id: "T1041",
+                name: "Exfiltration Over C2 Channel",
+                description: "Adversaries may steal data by exfiltrating it over an existing command and control channel.",
+                keywords: ["data exfiltration", "c2 channel", "command and control", "data theft", "exfiltration"]
+            },
+            {
+                id: "T1112",
+                name: "Modify Registry",
+                description: "Adversaries may interact with the Windows Registry to hide configuration information.",
+                keywords: ["modify registry", "registry modification", "reg add", "registry edit", "registry change"]
+            },
+            {
+                id: "T1564.003",
+                name: "Hidden Window",
+                description: "Adversaries may use hidden windows to conceal malicious activity from the plain sight of users.",
+                keywords: ["hidden window", "invisible window", "window hiding", "stealth execution"]
+            },
+            {
+                id: "T1140",
+                name: "Deobfuscate/Decode Files or Information",
+                description: "Adversaries may use obfuscated files or information to hide artifacts of an intrusion.",
+                keywords: ["decode", "deobfuscate", "decrypt", "unpack", "reveal", "decode payload"]
             }
         ];
 
-        // Global variables
         let currentResults = [];
-        let isAnalyzing = false;
 
-        // DOM elements
-        const attackDescription = document.getElementById('attackDescription');
-        const charCount = document.getElementById('charCount');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const exampleBtn = document.getElementById('exampleBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const resultsCount = document.getElementById('resultsCount');
-        const copyJsonBtn = document.getElementById('copyJsonBtn');
-        const downloadJsonBtn = document.getElementById('downloadJsonBtn');
-        const printBtn = document.getElementById('printBtn');
-
-        // Event listeners
-        attackDescription.addEventListener('input', handleTextChange);
-        analyzeBtn.addEventListener('click', analyzeText);
-        exampleBtn.addEventListener('click', loadExample);
-        clearBtn.addEventListener('click', clearText);
-        copyJsonBtn.addEventListener('click', copyToClipboard);
-        downloadJsonBtn.addEventListener('click', downloadJson);
-        printBtn.addEventListener('click', printReport);
-
-        // Handle text input changes
-        function handleTextChange() {
-            const text = attackDescription.value;
-            charCount.textContent = text.length;
+        // Analyze attack description
+        function analyzeAttack() {
+            const description = document.getElementById('attackDescription').value.trim();
             
-            // Enable/disable analyze button
-            analyzeBtn.disabled = text.trim().length === 0;
-            
-            // Real-time analysis for better UX
-            if (text.trim().length > 10) {
-                debounce(analyzeText, 1000)();
-            }
-        }
-
-        // Debounce function for performance
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Analyze text and map to techniques
-        function analyzeText() {
-            if (isAnalyzing) return;
-            
-            const text = attackDescription.value.trim().toLowerCase();
-            if (!text) {
-                showNoResults();
+            if (!description) {
+                alert('Please enter an attack description first.');
                 return;
             }
 
-            isAnalyzing = true;
+            // Show loading state
             showLoading();
             
-            // Simulate processing time for better UX
+            // Simulate analysis delay for realistic feel
             setTimeout(() => {
-                const results = mapTextToTechniques(text);
-                currentResults = results;
+                const results = performAnalysis(description);
                 displayResults(results);
-                updateExportButtons(results.length > 0);
-                isAnalyzing = false;
-            }, 500);
+            }, 1500);
         }
 
-        // Map text to MITRE ATT&CK techniques
-        function mapTextToTechniques(text) {
+        function showLoading() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">ANALYZING THREAT PATTERNS...</div>
+                </div>
+            `;
+        }
+
+        function performAnalysis(description) {
+            const words = description.toLowerCase().split(/\\s+/);
             const results = [];
-            
-            attackTechniques.forEach(technique => {
-                let score = 0;
-                let matchedKeywords = [];
-                
+
+            mitreDatabase.forEach(technique => {
+                const matchedKeywords = [];
+                let totalScore = 0;
+
                 technique.keywords.forEach(keyword => {
-                    if (text.includes(keyword.toLowerCase())) {
-                        // Higher score for exact matches
-                        const occurrences = (text.match(new RegExp(keyword.toLowerCase(), 'g')) || []).length;
-                        score += occurrences * (keyword.length > 3 ? 2 : 1);
+                    if (description.toLowerCase().includes(keyword.toLowerCase())) {
                         matchedKeywords.push(keyword);
+                        totalScore += keyword.length; // Longer keywords get more weight
                     }
                 });
-                
-                if (score > 0) {
-                    // Calculate confidence percentage
-                    const confidence = Math.min(95, Math.max(60, score * 15));
+
+                if (matchedKeywords.length > 0) {
+                    // Calculate confidence based on number of matches and keyword length
+                    const confidence = Math.min(100, (matchedKeywords.length * 20) + (totalScore * 2));
+                    let confidenceLevel = 'low';
                     
+                    if (confidence >= 70) confidenceLevel = 'high';
+                    else if (confidence >= 40) confidenceLevel = 'medium';
+
                     results.push({
                         ...technique,
-                        confidence: Math.round(confidence),
-                        matchedKeywords: matchedKeywords,
-                        score: score
+                        matchedKeywords,
+                        confidence,
+                        confidenceLevel
                     });
                 }
             });
-            
-            // Sort by confidence score (descending)
+
+            // Sort by confidence score
             return results.sort((a, b) => b.confidence - a.confidence);
         }
 
-        // Display results in the UI
         function displayResults(results) {
-            if (results.length === 0) {
-                showNoResults();
-                return;
-            }
-
-            resultsCount.textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+            currentResults = results;
+            const resultsDiv = document.getElementById('results');
+            const exportSection = document.getElementById('exportSection');
             
-            const html = results.map((technique, index) => {
-                const confidenceClass = technique.confidence >= 80 ? 'confidence-high' :
-                                      technique.confidence >= 65 ? 'confidence-medium' : 'confidence-low';
-                
-                return `
-                    <div class="technique-card" style="animation-delay: ${index * 0.1}s">
-                        <div class="technique-header">
-                            <span class="technique-id">${technique.id}</span>
-                            <span class="confidence-score ${confidenceClass}">${technique.confidence}% match</span>
-                        </div>
-                        <div class="technique-name">${technique.name}</div>
-                        <div class="technique-tactic">Tactic: ${technique.tactic}</div>
-                        <div class="technique-description">${technique.description}</div>
-                        ${technique.matchedKeywords.length > 0 ? 
-                            `<div style="margin-top: 10px; font-size: 12px; color: #a0aec0;">
-                                <strong>Matched keywords:</strong> ${technique.matchedKeywords.join(', ')}
-                            </div>` : ''
-                        }
+            // Update stats
+            document.getElementById('matchCount').textContent = results.length;
+            document.getElementById('highConfidence').textContent = 
+                results.filter(r => r.confidenceLevel === 'high').length;
+            document.getElementById('medConfidence').textContent = 
+                results.filter(r => r.confidenceLevel === 'medium').length;
+            document.getElementById('lowConfidence').textContent = 
+                results.filter(r => r.confidenceLevel === 'low').length;
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        <p>> NO MATCHES FOUND</p>
+                        <p style="font-size: 11px; margin-top: 10px;">Try using different keywords or check spelling</p>
                     </div>
                 `;
-            }).join('');
-            
-            resultsContainer.innerHTML = html;
+                exportSection.style.display = 'none';
+            } else {
+                resultsDiv.innerHTML = results.map(result => `
+                    <div class="technique-card" onclick="selectTechnique('${result.id}')">
+                        <div class="technique-header">
+                            <span class="technique-id">${result.id}</span>
+                            <span class="confidence-badge confidence-${result.confidenceLevel}">
+                                ${result.confidence}% ${result.confidenceLevel.toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="technique-name">${result.name}</div>
+                        <div class="technique-description">${result.description}</div>
+                        <div class="matched-keywords">
+                            ${result.matchedKeywords.map(keyword => 
+                                `<span class="keyword">${keyword}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                exportSection.style.display = 'block';
+            }
         }
 
-        // Show loading state
-        function showLoading() {
-            resultsContainer.innerHTML = '<div class="spinner"></div>';
-            resultsCount.textContent = 'Analyzing...';
+        function selectTechnique(techniqueId) {
+            const technique = currentResults.find(t => t.id === techniqueId);
+            if (technique) {
+                const url = `https://attack.mitre.org/techniques/${techniqueId.replace('.', '/')}/`;
+                window.open(url, '_blank');
+            }
         }
 
-        // Show no results state
-        function showNoResults() {
-            resultsContainer.innerHTML = `
-                <div class="no-results">
-                    <div class="icon">🔍</div>
-                    <p>No techniques found. Try describing specific attack methods, tools, or behaviors.</p>
-                </div>
-            `;
-            resultsCount.textContent = '0 results';
-            currentResults = [];
-            updateExportButtons(false);
-        }
-
-        // Load example text
         function loadExample() {
             const examples = [
-                "The attacker used PowerShell to download a malicious payload from a C2 server, then established persistence through a scheduled task and harvested credentials using Mimikatz.",
-                "Spearphishing email with malicious document attachment led to code execution. The malware performed system discovery using systeminfo and whoami commands, then moved laterally via RDP.",
-                "Adversary exploited public-facing web application vulnerability, deployed web shell, and used it to execute commands and exfiltrate sensitive data over HTTPS.",
-                "Ransomware deployed via compromised RDP credentials. Files were encrypted for impact after credential harvesting and lateral movement through SMB shares."
+                "Adversary used PowerShell to download and execute malicious payload from external server, established persistence through registry modification, and performed lateral movement using WMI.",
+                "Attacker sent spearphishing email with malicious Word document containing macro that downloaded additional payload via certutil, then used mimikatz to dump credentials from LSASS process.",
+                "Malware achieved persistence by creating Windows service, performed process injection into legitimate system process, and exfiltrated data over HTTP channel.",
+                "Threat actor used rundll32.exe to execute malicious DLL, performed system information discovery using systeminfo command, and established proxy for command and control communication."
             ];
             
             const randomExample = examples[Math.floor(Math.random() * examples.length)];
-            attackDescription.value = randomExample;
-            handleTextChange();
-            analyzeText();
+            document.getElementById('attackDescription').value = randomExample;
+            document.getElementById('charCount').textContent = randomExample.length;
         }
 
-        // Clear text and results
-        function clearText() {
-            attackDescription.value = '';
-            handleTextChange();
-            showNoResults();
-        }
-
-        // Copy results to clipboard as JSON
-        async function copyToClipboard() {
-            try {
-                const json = JSON.stringify(currentResults, null, 2);
-                await navigator.clipboard.writeText(json);
-                
-                // Visual feedback
-                const originalText = copyJsonBtn.textContent;
-                copyJsonBtn.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    copyJsonBtn.textContent = originalText;
-                }, 2000);
-            } catch (err) {
-                console.error('Failed to copy: ', err);
-                alert('Failed to copy to clipboard');
-            }
-        }
-
-        // Download results as JSON file
-        function downloadJson() {
-            const json = JSON.stringify(currentResults, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+        function clearInput() {
+            document.getElementById('attackDescription').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('results').innerHTML = `
+                <div class="no-results">
+                    <p>> AWAITING INPUT...</p>
+                    <p style="font-size: 11px; margin-top: 10px;">Enter attack description above to begin analysis</p>
+                </div>
+            `;
+            document.getElementById('exportSection').style.display = 'none';
             
+            // Reset stats
+            document.getElementById('matchCount').textContent = '0';
+            document.getElementById('highConfidence').textContent = '0';
+            document.getElementById('medConfidence').textContent = '0';
+            document.getElementById('lowConfidence').textContent = '0';
+        }
+
+        function exportResults() {
+            if (currentResults.length === 0) {
+                alert('No results to export.');
+                return;
+            }
+
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                input: document.getElementById('attackDescription').value,
+                results: currentResults.map(result => ({
+                    technique_id: result.id,
+                    technique_name: result.name,
+                    description: result.description,
+                    confidence: result.confidence,
+                    confidence_level: result.confidenceLevel,
+                    matched_keywords: result.matchedKeywords
+                })),
+                statistics: {
+                    total_matches: currentResults.length,
+                    high_confidence: currentResults.filter(r => r.confidenceLevel === 'high').length,
+                    medium_confidence: currentResults.filter(r => r.confidenceLevel === 'medium').length,
+                    low_confidence: currentResults.filter(r => r.confidenceLevel === 'low').length
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+                type: 'application/json' 
+            });
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `mitre-attack-analysis-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `mitre-analysis-${Date.now()}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        // Print report
-        function printReport() {
-            const printWindow = window.open('', '_blank');
-            const printContent = generatePrintReport();
-            
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
-        }
+        function copyToClipboard() {
+            if (currentResults.length === 0) {
+                alert('No results to copy.');
+                return;
+            }
 
-        // Generate HTML for print report
-        function generatePrintReport() {
-            const timestamp = new Date().toLocaleString();
-            
-            return `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>MITRE ATT&CK Analysis Report</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
-                        .technique { border: 1px solid #ccc; margin: 10px 0; padding: 15px; }
-                        .technique-id { background: #f0f0f0; padding: 5px; font-family: monospace; }
-                        .confidence { font-weight: bold; color: #0066cc; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>MITRE ATT&CK Analysis Report</h1>
-                        <p><strong>Generated:</strong> ${timestamp}</p>
-                        <p><strong>Input:</strong> ${attackDescription.value}</p>
-                        <p><strong>Results:</strong> ${currentResults.length} techniques identified</p>
-                    </div>
-                    
-                    ${currentResults.map(technique => `
-                        <div class="technique">
-                            <h3>${technique.name} <span class="technique-id">${technique.id}</span></h3>
-                            <p><strong>Tactic:</strong> ${technique.tactic}</p>
-                            <p><strong>Confidence:</strong> <span class="confidence">${technique.confidence}%</span></p>
-                            <p><strong>Description:</strong> ${technique.description}</p>
-                            ${technique.matchedKeywords.length > 0 ? 
-                                `<p><strong>Matched Keywords:</strong> ${technique.matchedKeywords.join(', ')}</p>` : ''
-                            }
-                        </div>
-                    `).join('')}
-                </body>
-                </html>
-            `;
-        }
+            let text = `MITRE ATT&CK Analysis Results\\n`;
+            text += `Generated: ${new Date().toISOString()}\\n`;
+            text += `Total Matches: ${currentResults.length}\\n\\n`;
 
-        // Update export button states
-        function updateExportButtons(enabled) {
-            copyJsonBtn.disabled = !enabled;
-            downloadJsonBtn.disabled = !enabled;
-            printBtn.disabled = !enabled;
-        }
-
-        // Initialize the application
-        function init() {
-            // Set initial state
-            handleTextChange();
-            showNoResults();
-            
-            // Add keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                // Ctrl+Enter to analyze
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    e.preventDefault();
-                    analyzeText();
-                }
-                
-                // Ctrl+L to load example
-                if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-                    e.preventDefault();
-                    loadExample();
-                }
-                
-                // Escape to clear
-                if (e.key === 'Escape') {
-                    clearText();
-                }
+            currentResults.forEach(result => {
+                text += `[${result.id}] ${result.name}\\n`;
+                text += `Confidence: ${result.confidence}% (${result.confidenceLevel.toUpperCase()})\\n`;
+                text += `Keywords: ${result.matchedKeywords.join(', ')}\\n`;
+                text += `URL: https://attack.mitre.org/techniques/${result.id.replace('.', '/')}/\\n\\n`;
             });
-            
-            console.log('MITRE ATT&CK Technique Mapper initialized');
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Results copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy to clipboard.');
+            });
         }
 
-        // Start the application when page loads
-        document.addEventListener('DOMContentLoaded', init);
+        function printResults() {
+            if (currentResults.length === 0) {
+                alert('No results to print.');
+                return;
+            }
+            window.print();
+        }
+
+        // Enter key support for analysis
+        document.getElementById('attackDescription').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeAttack();
+            }
+        });
+
+        // Animate stats on load
+        window.addEventListener('load', function() {
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach((stat, index) => {
+                setTimeout(() => {
+                    stat.style.animation = 'pulse 0.5s ease-in-out';
+                }, index * 100);
+            });
+        });
     </script>
 </body>
 </html>
